@@ -115,6 +115,22 @@ test('AWS.mock function should mock AWS service and method on the service', func
       });
     });
   });
+  t.test('eachPage is supported', function(st){
+    awsMock.restore('Lambda', 'getFunction');
+    awsMock.mock('Lambda', 'getFunction', function(params, callback) {
+        callback(null, 'message');
+    });
+    var lambda = new AWS.Lambda();
+    var i = 0;
+    lambda.getFunction({}).eachPage((err, data) => {
+        if (i++ == 0) {
+          st.equals(data, 'message');
+        } else {
+          st.equals(data, null);
+          st.end();
+        }
+    });
+  });
   if (typeof(Promise) === 'function') {
     t.test('promises are supported', function(st){
       awsMock.restore('Lambda', 'getFunction');

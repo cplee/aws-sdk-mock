@@ -150,6 +150,12 @@ function mockServiceMethod(service, client, method, replace) {
           this.push(null);
         };
         return stream;
+      },
+      eachPage: function eachPage(callback) {
+        if (storedResult) {
+          callback(storedResult.reject, storedResult.resolve)
+        }
+        callback(null, null);
       }
     };
 
