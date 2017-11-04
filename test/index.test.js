@@ -115,6 +115,36 @@ test('AWS.mock function should mock AWS service and method on the service', func
       });
     });
   });
+  t.test('eachPage handles error ', function(st){
+    awsMock.restore('Lambda', 'getFunction');
+    awsMock.mock('Lambda', 'getFunction', function(params, callback) {
+        callback(error, null);
+    });
+    var error = new Error('on purpose');
+    var lambda = new AWS.Lambda();
+    var i = 0;
+    lambda.getFunction({}).eachPage((err, data) => {
+      if (i++ === 0) {
+          st.equals(err, error);
+          st.equals(data, null);
+      } else {
+          st.equals(data, null);
+          st.end();
+      }
+    });
+  });
+  t.test('eachPage handles null ', function(st){
+    awsMock.restore('Lambda', 'getFunction');
+    awsMock.mock('Lambda', 'getFunction', function(params, callback) {
+        callback(null, null);
+    });
+    var lambda = new AWS.Lambda();
+    lambda.getFunction({}).eachPage((err, data) => {
+        st.equals(err, null);
+        st.equals(data, null);
+        st.end();
+    });
+  });
   t.test('eachPage is supported', function(st){
     awsMock.restore('Lambda', 'getFunction');
     awsMock.mock('Lambda', 'getFunction', function(params, callback) {
@@ -123,9 +153,11 @@ test('AWS.mock function should mock AWS service and method on the service', func
     var lambda = new AWS.Lambda();
     var i = 0;
     lambda.getFunction({}).eachPage((err, data) => {
-        if (i++ == 0) {
+        if (i++ === 0) {
+          st.equals(err, null);
           st.equals(data, 'message');
         } else {
+            st.equals(err, null);
           st.equals(data, null);
           st.end();
         }
